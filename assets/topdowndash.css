@@ -1,0 +1,46 @@
+body {
+    background-color:#ffffff;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#info_table{
+
+    align-self: center;
+    width: 100%;
+
+}
+
+
+.mini_container {
+    border-radius: 5px;
+    padding:2% 2% 2% 2%;
+    background-color: #f8f7fd88;
+    box-shadow: 2px 2px 2px 2px lightgrey;
+    text-align: center;
+    
+  }
+
+
+.body_container {
+  border-radius: 5px 5px 5px 5px;
+  background-color:#ffffff;
+  box-shadow: 2px 2px 2px 2px lightgrey;
+  text-align: center;
+}
+
+  h6 {
+    font-size: 1.25rem;
+  }
+  p {
+    font-size: 14px;
+  }
+
+  button {
+    font-family: 'Courier New';
+  }
+
+
+
+br {
+  padding-top: 5%;
+}
