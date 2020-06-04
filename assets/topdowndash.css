@@ -16,9 +16,12 @@ body {
     padding:2% 2% 2% 2%;
     background-color: #f8f7fd88;
     box-shadow: 2px 2px 2px 2px lightgrey;
+    margin: 2% 0% 2% 0%;
     text-align: center;
     
   }
+
+
 
 
 .body_container {
@@ -30,6 +33,8 @@ body {
 
   h6 {
     font-size: 1.25rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
   }
   p {
     font-size: 14px;
