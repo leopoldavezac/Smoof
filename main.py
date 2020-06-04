@@ -16,7 +16,7 @@ import glob
 
 
 charts_color = ['#42c8f5', '#543ab0', '#b03a9e', '#e80e3d', '#fff017', '#83ff17', '#17ffd4', '#0793de', '#3e2b80']
-files_name = [files for files in glob.iglob('*csv')]
+files_name = [files for files in glob.iglob('*.csv')]
 external_stylesheets = [dbc.themes.GRID, 'assets/topdowndash.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
@@ -377,10 +377,10 @@ def serve_layout():
     return html.Div([
             dbc.Container([
                 dbc.Row(dbc.Col(html.H1('TopDownDashboard', style={'textAlign': 'center'}))),
-                dbc.Row(dbc.Col(html.H3(" Let's create together a new framework for data exploration", style={'textAlign': 'center'}))),
+                dbc.Row(dbc.Col(html.H3("Explore your data frictionless", style={'textAlign': 'center'}))),
                 html.Br(),
-                dbc.Row(dbc.Col(dcc.Dropdown(id='file_select',
-                        options=[{'label':file_name, 'value':file_name} for file_name in files_name], value=''))),
+                dbc.Row([dbc.Col(dbc.Container(dbc.Row([dbc.Col(id='col_path_to_dir', children=dcc.Input(size='60', id='path_to_directory', type='text', placeholder='Directory path')), dbc.Col(html.Button(id='directory_entered', children='Go'))]))),dbc.Col(id='file_select_col')]),
+                html.Br(),
                 dbc.Row(html.Div(id='info_dataset'))
             ], className='body_container'),
             html.Div(id='selection_info', style={'display':'none'}),
@@ -431,7 +431,7 @@ def get_current_selection_visuals(selection):
 
     options_selection_radio = [{'label':'Overall', 'value':0}]
     options_selection_radio = options_selection_radio + [{'label': values['selected_col'] + ' = ' + values['selected_labels'] , 'value': key} for key, values in selection.items()] #to be replace by info_df['selection'].values
-    selection_radio = dbc.Col(dcc.RadioItems(id='radio_items', options= options_selection_radio, value=0,labelStyle={'display': 'inline-block'}))
+    selection_radio = dbc.Col(dcc.RadioItems(size='30px', id='radio_items', options= options_selection_radio, value=0,labelStyle={'display': 'inline-block'}))
     drop_selection_filter_button = dbc.Col(html.Button(id='drop_selection_btn', children='Drop selection series', className='mini_container'))
 
     return [dbc.Row(html.H6('Selection toolbar')), dbc.Row([selection_radio, drop_selection_filter_button])]
@@ -491,13 +491,20 @@ def update_selection(selection, type_selection, past_selection, max_index_past_s
     return past_selection
 
 
+@app.callback(Output('file_select_col', 'children'),
+                [Input('directory_entered', 'n_clicks')],
+                [State('path_to_directory', 'value')])
+def display_csv_in_directory(go_n_clicks, directory_path):
+    csvs = [csv for csv in glob.iglob(directory_path+'/*.csv')]
+    return dcc.Dropdown(id='file_select', options=[{'label':file_name[len(directory_path)+1:], 'value':file_name} for file_name in csvs], value='')
+
 
 @app.callback([Output('info_dataset', 'children'),
             Output('selection_info', 'children')],
             [Input('file_select', 'value')],
             [State('session-id', 'children')])
 def display_info_dataset(file_name, session_id):
-    if file_name in files_name:
+    if file_name not in [None, '']:
         info_df = get_info_dataframe(session_id, file_name)
         return prepare_info_visu(info_df), [html.Div({}, id='selection_info_1', style={'display': 'none'}), html.Div({}, id='selection_info_2', style={'display': 'none'})]
     else:
@@ -557,4 +564,4 @@ def update_selection_info(selection_click, drop_selection_btn_n_clicks, selectio
 app.layout = serve_layout
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
