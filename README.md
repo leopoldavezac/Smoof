@@ -1,4 +1,4 @@
-# TopDownDash
+# Smoof
 
 TopDownDash is a framework for exploring datasets frictionless
 
