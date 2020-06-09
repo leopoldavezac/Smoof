@@ -15,6 +15,10 @@ import dash_table
 import glob
 
 
+# filtering on category short string labels not working
+# drop selection not working
+# hist and value counts should be normalized
+
 charts_color = ['#42c8f5', '#543ab0', '#b03a9e', '#e80e3d', '#fff017', '#83ff17', '#17ffd4', '#0793de', '#3e2b80']
 files_name = [files for files in glob.iglob('*.csv')]
 external_stylesheets = [dbc.themes.GRID, 'assets/topdowndash.css']
@@ -207,9 +211,11 @@ def return_filter_ds_based_on_selection(selection, original_dataset, info_df):
         else:
             if type_var_selected in ['Date', 'DateC']:
                 df = df[df[slct_var].apply(lambda x: x[:10]) == slct_lbl]
-            elif test_is_int(slct_lbl):
-                slct_lbl = int(slct_lbl)
+            else:
+                if test_is_int(slct_lbl):
+                    slct_lbl = int(slct_lbl)
                 df = df[df[slct_var] == slct_lbl] 
+            
 
     return df
 
@@ -376,7 +382,7 @@ def serve_layout():
 
     return html.Div([
             dbc.Container([
-                dbc.Row(dbc.Col(html.H1('TopDownDashboard', style={'textAlign': 'center'}))),
+                dbc.Row(dbc.Col(html.H1('Smoof', style={'textAlign': 'center'}))),
                 dbc.Row(dbc.Col(html.H3("Explore your data frictionless", style={'textAlign': 'center'}))),
                 html.Br(),
                 dbc.Row([dbc.Col(dbc.Container(dbc.Row([dbc.Col(id='col_path_to_dir', children=dcc.Input(size='60', id='path_to_directory', type='text', placeholder='Directory path')), dbc.Col(html.Button(id='directory_entered', children='Go'))]))),dbc.Col(id='file_select_col')]),
@@ -431,7 +437,7 @@ def get_current_selection_visuals(selection):
 
     options_selection_radio = [{'label':'Overall', 'value':0}]
     options_selection_radio = options_selection_radio + [{'label': values['selected_col'] + ' = ' + values['selected_labels'] , 'value': key} for key, values in selection.items()] #to be replace by info_df['selection'].values
-    selection_radio = dbc.Col(dcc.RadioItems(size='30px', id='radio_items', options= options_selection_radio, value=0,labelStyle={'display': 'inline-block'}))
+    selection_radio = dbc.Col(dcc.RadioItems(id='radio_items', options= options_selection_radio, value=0,labelStyle={'display': 'inline-block'}))
     drop_selection_filter_button = dbc.Col(html.Button(id='drop_selection_btn', children='Drop selection series', className='mini_container'))
 
     return [dbc.Row(html.H6('Selection toolbar')), dbc.Row([selection_radio, drop_selection_filter_button])]
@@ -553,6 +559,10 @@ def update_selection_info(selection_click, drop_selection_btn_n_clicks, selectio
     
     if drop_selection_btn_n_clicks is not None: 
         del past_selection[radio_items_selection_value]
+        current_keys = list(past_selection.keys())
+        for i, key in enumerate(current_keys):
+            past_selection[str(i)] = past_selection.pop(key)
+
 
     type_selection, selection = return_non_none_selection(selection_click, selection_box)
     past_selection = update_selection(selection, type_selection, past_selection, max_index_past_selection, selected_cols, radio_items_selection_value)
@@ -564,4 +574,4 @@ def update_selection_info(selection_click, drop_selection_btn_n_clicks, selectio
 app.layout = serve_layout
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
