@@ -400,23 +400,53 @@ def get_var_chart(var_info, nb_selection_filter, col, selection):
     if var_info['type'] == 'CategoryLong':
 
         for i in range(nb_selection_filter+1):
+
+            name = selection[str(i-1)]['selected_col'] + '='  + selection[str(i-1)]['selected_labels'] if i > 0 else 'overall'
+           
+            if i>0:
+                selection_on = selection[str(i-1)]['selection_on_selection']
+                while selection_on != 0:
+                    selection_on_selection = selection[str(selection_on)]
+                    name = name + ' and ' + selection_on_selection['selected_col'] +' = '+ selection_on_selection['selected_labels']
+                    selection_on = selection_on_selection['selection_on_selection']
+                
             dict_data = {'type': 'histogram', 'x': var_info['data'][i]['count'].values,
-                        'name': selection[str(i-1)]['selected_col'] + '='  + selection[str(i-1)]['selected_labels'] if i > 0 else 'overall',
+                        'name': name,
                         'marker':{'color':charts_color[i]}}
             data.append(dict_data)
     
     elif var_info['type'] == 'Numeric':
         for i in range(nb_selection_filter+1):
+
+            name = selection[str(i-1)]['selected_col'] + '='  + selection[str(i-1)]['selected_labels'] if i > 0 else 'overall'
+           
+            if i>0:
+                selection_on = selection[str(i-1)]['selection_on_selection']
+                while selection_on != 0:
+                    selection_on_selection = selection[str(selection_on)]
+                    name = name + ' and ' + selection_on_selection['selected_col'] +' = '+ selection_on_selection['selected_labels']
+                    selection_on = selection_on_selection['selection_on_selection']
+
             dict_data = {'type': 'histogram', 'x':var_info['data'][i],
-            'name': selection[str(i-1)]['selected_col'] + '='  + selection[str(i-1)]['selected_labels'] if i > 0 else 'overall',
+            'name': name,
             'marker':{'color':charts_color[i]}}
             data.append(dict_data)
 
     else:
         for i in range(nb_selection_filter+1):
+
+            name = selection[str(i-1)]['selected_col'] + '='  + selection[str(i-1)]['selected_labels'] if i > 0 else 'overall'
+           
+            if i>0:
+                selection_on = selection[str(i-1)]['selection_on_selection']
+                while selection_on != 0:
+                    selection_on_selection = selection[str(selection_on)]
+                    name = name + ' and ' + selection_on_selection['selected_col'] +' = '+ selection_on_selection['selected_labels']
+                    selection_on = selection_on_selection['selection_on_selection']
+
             dict_data = {'type': 'bar', 'x': var_info['data'][i]['labels'].values,
                         'y':var_info['data'][i]['count'].values,
-                        'name': selection[str(i-1)]['selected_col'] + '='  + selection[str(i-1)]['selected_labels'] if i > 0 else 'overall',
+                        'name': name,
                         'marker':{'color':charts_color[i]}}
             data.append(dict_data)      
 
@@ -435,9 +465,17 @@ def get_tab_category(info_var, nb_selection_filter, col):
 
 def get_current_selection_visuals(selection):
 
-    options_selection_radio = [{'label':'Overall', 'value':0}]
-    options_selection_radio = options_selection_radio + [{'label': values['selected_col'] + ' = ' + values['selected_labels'] , 'value': key} for key, values in selection.items()] #to be replace by info_df['selection'].values
-    selection_radio = dbc.Col(dcc.RadioItems(id='radio_items', options= options_selection_radio, value=0,labelStyle={'display': 'inline-block'}))
+    options = [{'label':'Overall', 'value':0}]
+    for key, values in selection.items():
+        label = values['selected_col'] + ' = ' + values['selected_labels']
+        selection_on = values['selection_on_selection']
+        while selection_on != 0:
+            selection_on_selection = selection[selection_on]
+            label = label + ' and '+ selection_on_selection['selected_col'] + ' = ' + selection_on_selection['selected_labels']
+            selection_on = selection_on_selection['selection_on_selection']
+        options.append({'label': label, 'value':key})
+
+    selection_radio = dbc.Col(dcc.RadioItems(id='radio_items', options= options, value=0,labelStyle={'display': 'inline-block'}))
     drop_selection_filter_button = dbc.Col(html.Button(id='drop_selection_btn', children='Drop selection series', className='mini_container'))
 
     return [dbc.Row(html.H6('Selection toolbar')), dbc.Row([selection_radio, drop_selection_filter_button])]
