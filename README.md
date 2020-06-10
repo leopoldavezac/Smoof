@@ -11,7 +11,7 @@ Make sure that you have the following packages installed : pandas, numpy, flask_
 
 Run the python code and click on the link that appears on your console.
 
-For information on the various commands please refers to the [how to guide](https://www.google.com)
+For information on the various commands please refers to the [how to guide](https://medium.com/@leopoldavezac/explore-your-data-frictionless-adddb3759bb)
 
 
 
