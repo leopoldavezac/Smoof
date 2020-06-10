@@ -15,15 +15,12 @@ import dash_table
 import glob
 
 
-# filtering on category short string labels not working
-# drop selection not working
-# hist and value counts should be normalized
-
+# global variables
 charts_color = ['#42c8f5', '#543ab0', '#b03a9e', '#e80e3d', '#fff017', '#83ff17', '#17ffd4', '#0793de', '#3e2b80']
-files_name = [files for files in glob.iglob('*.csv')]
 external_stylesheets = [dbc.themes.GRID, 'assets/topdowndash.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
+# cache system parameters
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
     'CACHE_DIR': 'cache-directory',
@@ -32,12 +29,16 @@ cache = Cache(app.server, config={
 
 def test_is_cdate(first_val):
 
+    """ Test if value passed is a date represented as datetime object """
+
     if isinstance(first_val, datetime.datetime):
         return True
     else:
         return False
 
 def test_is_date(first_val):
+
+    """ Test if value passed is a date represented as an object """
 
     if isinstance(first_val, str):
         try :
@@ -48,6 +49,8 @@ def test_is_date(first_val):
 
 def test_no_key_error(dict, key):
 
+    """ Test if key is in dictionnary keys """
+
     try :
         dict[key]
         return True
@@ -55,6 +58,8 @@ def test_no_key_error(dict, key):
         return False
 
 def test_is_category(first_val, labels_length):
+
+    """ Test if value passed is a category """
 
     if type(first_val) == str:
         return True
@@ -65,6 +70,8 @@ def test_is_category(first_val, labels_length):
 
 def test_is_int(first_val):
 
+    """ Test if value passed is an integer """
+
     try :
         int(first_val)
         return True
@@ -72,6 +79,8 @@ def test_is_int(first_val):
         return False
 
 def identify_type(labels_length, feature_length, first_val):
+
+    """ Identify variable type """ 
    
     if test_is_cdate(first_val):
         return 'DateC'
@@ -97,6 +106,8 @@ def identify_type(labels_length, feature_length, first_val):
 
 def return_non_none_selection(selection_click, selection_box):
 
+    """ Find which of selection_click and selection_box contains the user selection and return it """
+
     selection_to_return = [None, None]
 
     if selection_click is not None:
@@ -121,6 +132,8 @@ def return_non_none_selection(selection_click, selection_box):
 
 def read_dataset(filename):
 
+    """ Read dataset using appropriate sep """
+
     for sep in [',',';','|']:
             df = pd.read_csv(filename, sep=sep)
             nb_cols = len(df.columns)
@@ -131,12 +144,16 @@ def read_dataset(filename):
     return df, df_size
 
 def nb_records_with_na(df):
+
+    """ Count the number of records containing NaNs in the dataset """
     
     reccord_contains_na = df.apply(axis=1, func=lambda x: True if (x.isna().sum()>0) else False)
    
     return reccord_contains_na.sum()
 
 def basic_info_dataset(df):
+
+    """ Compute general informations about the loaded dataset """
     
     nb_dupli = len(df)
     df.drop_duplicates(inplace=True)
@@ -153,6 +170,8 @@ def basic_info_dataset(df):
 
 
 def basic_info_var(var_data):
+
+    """ Compute general informations about a variable """
     
     info_var = {}
     info_var['nb_na'] = len(var_data)
@@ -166,6 +185,8 @@ def basic_info_var(var_data):
     return info_var
 
 def stats_info_var(var_data):
+
+    """ Compute statistics on a variable """
 
     var_stats_info = {}
     var_stats_info['mean'] = round(var_data.mean(), 2)
@@ -181,6 +202,9 @@ def stats_info_var(var_data):
     return var_stats_info
 
 def return_filter_ds_based_on_selection(selection, original_dataset, info_df):
+
+    
+    """ Filter dataset according to passed selection and return filtered dataset """
     
     slct_var = selection['selected_col']
     slct_on = selection['selection_on_selection']
@@ -223,6 +247,9 @@ def return_filter_ds_based_on_selection(selection, original_dataset, info_df):
 
 def get_dataset(session_id, filename):
 
+
+    """ Cache loaded dataset """
+
     @cache.memoize()
     def query_dataset(session_id, filename):
         dataset, dataset_size = read_dataset(filename)
@@ -233,8 +260,14 @@ def get_dataset(session_id, filename):
 
 
 def get_info_dataframe(session_id, filename):
+
+
+    """  Compute general information about the loaded dataset, Identify variables types,
+    Compute stats and basic infos on them, Cache the results """
+
     @cache.memoize()
     def query_and_serialize_data(session_id, filename):
+
 
         current_time = time.time()
         dataset = get_dataset(session_id, filename)
@@ -256,9 +289,6 @@ def get_info_dataframe(session_id, filename):
             else:
                 info_col['data'] = {}
                 if info_col['type'] in ['CategoryShort', 'CategoryLong','Date', 'DateC']:
-                   # if isinstance(col_data.iloc[0], np.int64):
-                    #    print(name, 'istype_ind')
-                     #   col_data = col_data.astype('object')
 
                     info_col['data'][0] = col_data.value_counts().reset_index()
                     info_col['data'][0].columns = ['labels', 'count']
@@ -278,6 +308,8 @@ def get_info_dataframe(session_id, filename):
 
 
 def get_filtered_dataframe(session_id, file_name, selection):
+
+    """ Retrieve cache dataset, Filter it accordingly to selection, Cache the results """
 
     @cache.memoize()
     def filter_data(session_id, file_name, selection):
@@ -322,6 +354,10 @@ def get_filtered_dataframe(session_id, file_name, selection):
 
 
 def basic_info_dataset_visual(info):
+
+    """ Output cached basic informations on the dataset """
+
+    
     top_info = dbc.Row(id='top_short_info', 
                                 children = [
                                     dbc.Col([html.H6(str(info['nb_observations'])), html.P('Records')], className='mini_container'),
@@ -339,6 +375,8 @@ def basic_info_dataset_visual(info):
     return top_info
 
 def cols_stats_visual(info_data):
+
+    """ Output cached informations and statistics on variables """
 
     col_tab = ['variable'] + list(info_data.keys())
     tab_val = []
@@ -364,6 +402,8 @@ def cols_stats_visual(info_data):
 
 def prepare_info_visu(info_df):
 
+    """ Output dataset basic infos and variables infos and statistics """
+
     top_info = basic_info_dataset_visual(info_df['info'])
     tab = cols_stats_visual(info_df['data'])
 
@@ -377,6 +417,8 @@ def prepare_info_visu(info_df):
 
 
 def serve_layout():
+
+    """ Serve initial layout """
 
     session_id = str(uuid.uuid4())
 
@@ -395,6 +437,8 @@ def serve_layout():
 
 
 def get_var_chart(var_info, nb_selection_filter, col, selection):
+
+    """ Output a variable distribution for all the selections in memory """
 
     data = []
     if var_info['type'] == 'CategoryLong':
@@ -455,6 +499,8 @@ def get_var_chart(var_info, nb_selection_filter, col, selection):
 
 def get_tab_category(info_var, nb_selection_filter, col):
 
+    """ For variable of type category long, output value counts for last selection """
+
     data_table = dash_table.DataTable(id=col+'_table',
                                 sort_action='native',
                                 columns=[{"name": i, "id": i} for i in info_var['data'][nb_selection_filter].columns],
@@ -464,6 +510,8 @@ def get_tab_category(info_var, nb_selection_filter, col):
 
 
 def get_current_selection_visuals(selection):
+
+    """ Output radio items to navigate accross selection """
 
     options = [{'label':'Overall', 'value':0}]
     for key, values in selection.items():
@@ -482,6 +530,8 @@ def get_current_selection_visuals(selection):
 
 
 def update_selection(selection, type_selection, past_selection, max_index_past_selection, selected_cols, radio_items_selection_value):
+    
+    """ Update selections saved results with user last selection """
     
     if (type_selection != [None, None]) and (type_selection != None):
 
@@ -539,6 +589,9 @@ def update_selection(selection, type_selection, past_selection, max_index_past_s
                 [Input('directory_entered', 'n_clicks')],
                 [State('path_to_directory', 'value')])
 def display_csv_in_directory(go_n_clicks, directory_path):
+
+    """ Based on taped in directory path, Show csv files in directory """
+
     csvs = [csv for csv in glob.iglob(directory_path+'/*.csv')]
     return dcc.Dropdown(id='file_select', options=[{'label':file_name[len(directory_path)+1:], 'value':file_name} for file_name in csvs], value='')
 
@@ -548,6 +601,9 @@ def display_csv_in_directory(go_n_clicks, directory_path):
             [Input('file_select', 'value')],
             [State('session-id', 'children')])
 def display_info_dataset(file_name, session_id):
+
+    """ On file selection, Prepare datasets, Output dataset key info and variables key info and stats """
+
     if file_name not in [None, '']:
         info_df = get_info_dataframe(session_id, file_name)
         return prepare_info_visu(info_df), [html.Div({}, id='selection_info_1', style={'display': 'none'}), html.Div({}, id='selection_info_2', style={'display': 'none'})]
@@ -564,6 +620,8 @@ def display_info_dataset(file_name, session_id):
             [State('file_select', 'value'), 
             State('session-id', 'children')])
 def display_var(cols, selection, file_name, session_id):
+
+    """ Display variable(s) distribution on user variable selection or user modification of saved selections  """
 
     visual_selection = get_current_selection_visuals(selection)
 
@@ -593,6 +651,8 @@ def display_var(cols, selection, file_name, session_id):
                 State('info_table', 'selected_columns')])
 def update_selection_info(selection_click, drop_selection_btn_n_clicks, selection_box, past_selection, radio_items_selection_value, selected_cols):
 
+    """ Update selection on user drop of a selection or interaction with chart """
+
     max_index_past_selection = len(past_selection.keys())
     
     if drop_selection_btn_n_clicks is not None: 
@@ -612,4 +672,4 @@ def update_selection_info(selection_click, drop_selection_btn_n_clicks, selectio
 app.layout = serve_layout
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
