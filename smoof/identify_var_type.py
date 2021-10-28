@@ -1,13 +1,35 @@
+from typing import Dict
+
 import re
 
-from pandas import Series
+from pandas import Series, DataFrame
+
+from flask_caching import Cache
+
+def get_var_types(df: DataFrame, cache: Cache) -> Dict:
+
+    @cache.memoize()
+    def cache_var_types(df: DataFrame) -> Dict:
+
+        var_nm_to_type_nm = {}
+
+        for var_nm in df.columns:
+
+            var_type_identifier = VarTypeIdentifier(df[var_nm])
+            var_type_identifier.identify_type()
+            var_nm_to_type_nm[var_nm] = var_type_identifier.get_type()
+        
+        return var_nm_to_type_nm
+
+    return cache_var_types(df)
+
 
 
 class VarTypeIdentifier:
 
     def __init__(self, var_series: Series) -> None:
 
-        self.__var_series = var_series
+        self.__var_series = var_series.loc[~var_series.isna()]
 
     def identify_type(self) -> None:
 
