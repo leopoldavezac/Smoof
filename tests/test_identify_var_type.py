@@ -18,8 +18,6 @@ from smoof.identify_var_type import VarTypeIdentifier
 )
 def test_VarTypeIdentifier_identify_type(input_val, expected_output_val):
 
-    print(input_val.dtype)
-
     var_type_identifier = VarTypeIdentifier(input_val)
     var_type_identifier.identify_type()
 
