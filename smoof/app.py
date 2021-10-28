@@ -28,7 +28,11 @@ def get_app() -> Dash:
 
     return app
 
-if __name__ == '__main__':
+def main() -> None:
 
     app = get_app()
-    app.run_server(debug=True)
+    app.run_server()
+
+if __name__ == '__main__':
+
+    main()
