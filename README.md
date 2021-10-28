@@ -4,21 +4,64 @@ TopDownDash is a framework for exploring datasets frictionless
 
 ## Installation
 
-Clone the repository and place it wherever you want on your computer.
-Make sure that you have the following packages installed : pandas, numpy, flask_caching, dash, dash_bootrstraps_components
+Clone this repository in a new directory.
+
+## Prequistes
+
+- Anaconda installed
+
+## Installation
+
+```bash
+
+$ path/to/this/dir conda env create -f environment.yaml
+$ path/to/this/dir conda activate smoof
+$ path/to/this/dir pip install e .
+
+```
+
 
 ## Usage
 
-Run the python code and click on the link that appears on your console.
 
-For information on the various commands please refers to the [how to guide](https://medium.com/@leopoldavezac/explore-your-data-frictionless-adddb3759bb)
+### Launch the app
+
+```bash
+
+$ path/to/this/dir smoof
+
+```
+
+### Load a dataset
+
+![chart](docs/load_df.gif)
+
+### Select variables to plot
+
+![chart](docs/plot_var.gif)
+
+### Click and filter
+
+On bar plots only.
+
+![chart](docs/click_select.gif)
+
+### Drag and filter
+
+On histogram only.
+
+![chart](docs/box_select.gif)
+
+# Drop filter
+
+![chart](docs/drop_filter.gif)
 
 
+## Contact
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+If you want to contact me you can reach me at leopoldavezac@gmail.com.
 
 
 ## License
 
-None
+This project use the following licence, [MIT](./LICENCE)

@@ -1,0 +1,12 @@
+name: smoof
+dependencies: 
+  - pandas
+  - dash
+  - pip
+  - pip:
+    - flask_caching
+    - dash_bootstrap_components
+    - pytest-dash
+
+
+ 
